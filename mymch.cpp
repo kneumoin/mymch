@@ -1,12 +1,12 @@
 #include "mymch.hpp"
 
-const char* const PROGRAM[] = {">                          v", "@,,,,,,,,,,,,\"Hello World!\"<", "                            "};
-
 int main(){
-	BefungeStackMachine* A = new BefungeStackMachine(PROGRAM, sizeof(PROGRAM)/sizeof(*PROGRAM));
+	ifstream fin( "hello.bf" );
+	BefungeStackMachine* A = new BefungeStackMachine(fin);
 	int a[] = {0,0};
-	//A->print_program();
+	A->print_program();
 	A->run(a);
 	delete(A);
+	fin.close();
 	return 0;
 }

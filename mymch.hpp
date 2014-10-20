@@ -1,10 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <cstdlib>
 #include <stack>
+#include <time.h>
 
 using namespace std;
 class BefungeStackMachine {
@@ -12,7 +12,7 @@ class BefungeStackMachine {
 	int width;
 	int length;
 	int point[2];
-	char** program;
+	vector<string> program;
 	char cur_dir;
 	bool running;
 	bool push_on;
@@ -56,63 +56,73 @@ class BefungeStackMachine {
 		return 0;
 	}
 
+	char getsymbol() {
+		return program[point[0]][point[1]];
+	}
+
 	int exec(){
-		char symb, c = program[point[0]][point[1]];
-		switch (c){
-			case '>': case '<': case 'v': case '^':
+		char c = getsymbol();
+
+		if (c == '>' or c == '<' or c == 'v' or c == '^') {
 				cur_dir = c;
+				return 0;
+		}
+
+		if (c == ',' or c == '.') {
+			char symb = pop();
+			if (symb == -1)
+				return -1;
+			cout << symb;
+			return 0;
+		}
+
+		switch (c){
+			case ' ':
 				return 0;
 			case '"':
 				push_on = not push_on;
 				return 0;
-			case ',':
-				symb = pop();
-				if (symb == -1)
-					return -1;
-				cout << symb;
-				break;
 			case '@':
 				running = false;
 				return -1;
+			case '?':
+				cur_dir = "v^<>"[rand() % 4];
+				return 0;
 			}
-		if (push_on) {
+
+		if (push_on or (c <= 9 and c >= 0)) {
+			int i = c - (int)'0';
 			push(c);
 			return 0;
 		}
-		return 0;
+		cout << "Stop, new symbol: " << c << endl;
+		return -1;
 	}
 public:
-	BefungeStackMachine(const char* const src[], int src_l, int l = 25, int w = 80) : length(l), width(w) {
-		program = new char*[l];
+	BefungeStackMachine(ifstream& fin, int l = 25, int w = 80) : length(l), width(w) {
 		running = false;
 		push_on = false;
+		srand(time(NULL));
 
-		for(int i = 0, j = 0; i < l; ++i){
-			program[i] = new char[w];
-			memset(program[i], 0, sizeof(char) * w);
-			if (j < src_l){
-				memcpy(program[i], src[j], strlen(src[j]));
-				++j;
-			}
+		string line;
+		while(getline(fin, line)) {
+			program.push_back(line);
 		}
 	}
 
 
 	~BefungeStackMachine() {
-		for(int i = 0; i < length; ++i)
-			delete program[i];
-		delete program;
 	}
 
 	void print_program() {
-		for(int i = 0; i < length; ++i)
-			cout << program[i] << endl;
+		for (auto line: program)
+			cout << line << endl;
 	}
 
 	int run(const int* start_point){
 		running = true;
 		memcpy(point, start_point, sizeof(start_point));
-		cur_dir = program[point[0]][point[1]];
+		cur_dir = '>';
 		do{
 			if (exec() or move())
 				running = false;
