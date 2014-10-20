@@ -35,22 +35,22 @@ class BefungeStackMachine {
 		switch(cur_dir) {
 			case '>':
 				++point[1];
-				if (point[1] >= width)
+				if (width and point[1] >= width)
 					point[1] = 0;
 				break;
 			case '<':
 				--point[1];
-				if (point[1] < 0)
+				if (width and point[1] < 0)
 					point[1] = width - point[1];
 				break;
 			case 'v':
 				++point[0];
-				if (point[0] >= length)
+				if (length and point[0] >= length)
 					point[0] = 0;
 				break;
 			case '^':
 				--point[0];
-				if (point[0] < 0)
+				if (length and point[0] < 0)
 					point[0] = length - point[0];
 				break;
 			default:
@@ -64,10 +64,21 @@ class BefungeStackMachine {
 	}
 
 	char getsymbol() {
-		if (point[0] >= program.size())
-			program.resize((int) (point[0] * 1.5));
+		if (point[0] >= program.size()){
+			int new_size;
+			if (length)
+				new_size = length;
+			else
+				new_size = point[0] * 1.5;
+			program.resize(new_size);
+		}
 		if (point[1] >= program[point[0]].size()) {
-			program[point[0]].resize((int) (point[1] * 1.5), ' ');
+			int new_size;
+			if (length)
+				new_size = length;
+			else
+				new_size = point[1] * 1.5;
+			program[point[0]].resize(new_size, ' ');
 		}
 #ifdef DEBUG
 		cout << "c: " << program[point[0]][point[1]] << ' ';
@@ -110,18 +121,20 @@ class BefungeStackMachine {
 			push(c);
 			return 0;
 		}
-		cout << endl << "Stop, new symbol: " << (int)c << endl;
+		cout << endl << "Stop, new symbol: '" << c << '\''<< endl;
 		return -1;
 	}
 public:
-	BefungeStackMachine(ifstream& fin, int l = 25, int w = 80) : length(l), width(w) {
+	BefungeStackMachine(ifstream& fin, int l = 0, int w = 0) : length(l), width(w) {
 		running = false;
 		push_on = false;
 		srand(time(NULL));
 
 		string line;
 		while(getline(fin, line)) {
-			program.push_back(line);
+			if (!length and !width)
+				program.push_back(line);
+			//TO_DO 25x80
 		}
 	}
 
