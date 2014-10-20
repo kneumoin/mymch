@@ -2,9 +2,12 @@
 #include <fstream>
 #include <vector>
 #include <string.h>
+#include <unistd.h>
 #include <cstdlib>
 #include <stack>
 #include <time.h>
+
+//#define DEBUG
 
 using namespace std;
 class BefungeStackMachine {
@@ -53,10 +56,22 @@ class BefungeStackMachine {
 			default:
 				return -1;
 			}
+#ifdef DEBUG
+		usleep(300000);
+		cout << point[0] << ':' << point[1] << endl;
+#endif
 		return 0;
 	}
 
 	char getsymbol() {
+		if (point[0] >= program.size())
+			program.resize((int) (point[0] * 1.5));
+		if (point[1] >= program[point[0]].size()) {
+			program[point[0]].resize((int) (point[1] * 1.5), ' ');
+		}
+#ifdef DEBUG
+		cout << "c: " << program[point[0]][point[1]] << ' ';
+#endif
 		return program[point[0]][point[1]];
 	}
 
@@ -90,12 +105,12 @@ class BefungeStackMachine {
 				return 0;
 			}
 
-		if (push_on or (c <= 9 and c >= 0)) {
+		if (push_on or (c >= '0' and c <= '9')) {
 			int i = c - (int)'0';
 			push(c);
 			return 0;
 		}
-		cout << "Stop, new symbol: " << c << endl;
+		cout << endl << "Stop, new symbol: " << (int)c << endl;
 		return -1;
 	}
 public:
