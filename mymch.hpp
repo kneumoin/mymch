@@ -7,7 +7,7 @@
 #include <stack>
 #include <time.h>
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 class BefungeStackMachine {
@@ -18,17 +18,33 @@ class BefungeStackMachine {
 	vector<string> program;
 	char cur_dir;
 	bool running;
-	bool push_on;
+	bool symb_mode;
 	char pop() {
-		if (m_stack.empty())
-			return -1;
+#ifdef DEBUG
+		cout << point[0] << 'x' << point[1] << " pop: ";
+#endif
+		if (m_stack.empty()){
+#ifdef DEBUG
+		cout << "empty"<< endl;
+#endif
+			return 0; // befunge-93 says popping off an empty stack returns 0
+		}
 		char top = m_stack.top();
 		m_stack.pop();
+#ifdef DEBUG
+		if (symb_mode)
+			cout << (char)top << endl;
+		else
+			cout << (int)top << endl;
+#endif
 		return top;
 	}
 
 	void push(char c) {
 		m_stack.push(c);
+#ifdef DEBUG
+		cout << point[0] << 'x' << point[1] << " push: " << (int)c << endl;
+#endif
 	}
 
 	int move(){
@@ -54,11 +70,11 @@ class BefungeStackMachine {
 					point[0] = length - point[0];
 				break;
 			default:
-				return -1;
+				exit(-1);
+				//return -1;
 			}
 #ifdef DEBUG
 		usleep(300000);
-		cout << point[0] << ':' << point[1] << endl;
 #endif
 		return 0;
 	}
@@ -81,53 +97,63 @@ class BefungeStackMachine {
 			program[point[0]].resize(new_size, ' ');
 		}
 #ifdef DEBUG
-		cout << "c: " << program[point[0]][point[1]] << ' ';
+		cout << "c: " << program[point[0]][point[1]] << ' ' << endl;
 #endif
 		return program[point[0]][point[1]];
 	}
 
 	int exec(){
-		char c = getsymbol();
+		char a, b, res, symb, c = getsymbol();
+
+		if (c == '"'){
+			symb_mode = not symb_mode;
+			return 0;
+		}
+
+		if (symb_mode) {
+			push(c);
+			return 0;
+		}
 
 		if (c == '>' or c == '<' or c == 'v' or c == '^') {
-				cur_dir = c;
-				return 0;
+			cur_dir = c;
+			return 0;
 		}
 
 		if (c == ',' or c == '.') {
-			char symb = pop();
-			if (symb == -1)
-				return -1;
+			symb = pop();
 			cout << symb;
 			return 0;
 		}
 
 		switch (c){
-			case ' ':
-				return 0;
-			case '"':
-				push_on = not push_on;
-				return 0;
 			case '@':
 				running = false;
 				return -1;
 			case '?':
 				cur_dir = "v^<>"[rand() % 4];
 				return 0;
+			case '*':
+				push(pop() * pop());
+				return 0;
+			case '+':
+				push(pop() + pop());
+				return 0;
+			case 'p':
+				program[pop()][pop()] = pop();
+				print_program();
+				return 0;
+			case ':':
+				push(m_stack.top());
+				return 0;
 			}
-
-		if (push_on or (c >= '0' and c <= '9')) {
-			int i = c - (int)'0';
-			push(c);
-			return 0;
-		}
-		cout << endl << "Stop, new symbol: '" << c << '\''<< endl;
-		return -1;
+		push(c);
+		return 0;
 	}
 public:
 	BefungeStackMachine(ifstream& fin, int l = 0, int w = 0) : length(l), width(w) {
 		running = false;
-		push_on = false;
+		symb_mode = false;
 		srand(time(NULL));
 
 		string line;
