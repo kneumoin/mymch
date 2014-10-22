@@ -7,7 +7,7 @@
 #include <stack>
 #include <time.h>
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 class BefungeStackMachine {
@@ -52,7 +52,7 @@ class BefungeStackMachine {
 			case '>':
 				++point[1];
 				if (width and point[1] >= width)
-					point[1] = 0;
+					point[1] = point[1] - width;
 				break;
 			case '<':
 				--point[1];
@@ -62,7 +62,7 @@ class BefungeStackMachine {
 			case 'v':
 				++point[0];
 				if (length and point[0] >= length)
-					point[0] = 0;
+					point[0] = point[0] - length;
 				break;
 			case '^':
 				--point[0];
@@ -105,12 +105,7 @@ class BefungeStackMachine {
 	int exec(){
 		char a, b, res, symb, c = getsymbol();
 
-		if (c == '"'){
-			symb_mode = not symb_mode;
-			return 0;
-		}
-
-		if (symb_mode) {
+		if (symb_mode && c != '"') {
 			push(c);
 			return 0;
 		}
@@ -120,13 +115,24 @@ class BefungeStackMachine {
 			return 0;
 		}
 
-		if (c == ',' or c == '.') {
+		if (c == ',') {
 			symb = pop();
 			cout << symb;
 			return 0;
 		}
 
+		if (c == '.') {
+			symb = pop();
+			cout << (int)symb;
+			return 0;
+		}
+
 		switch (c){
+			case ' ':
+				return 0;
+			case '"':
+				symb_mode = not symb_mode;
+				return 0;
 			case '@':
 				running = false;
 				return -1;
@@ -141,13 +147,61 @@ class BefungeStackMachine {
 				return 0;
 			case 'p':
 				program[pop()][pop()] = pop();
-				print_program();
 				return 0;
+			case 'g':
+				push(program[pop()][pop()]);
+				return 0;
+			case '_':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '|':
+				if (pop())
+					cur_dir = '^';
+				else
+					cur_dir = 'v';
+				return 0;
+			case '#':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '-':
+				a = pop();
+				b = pop();
+				push(b - a);
+				return 0;
+			case '/':
+				a = pop();
+				if (!a){
+					cout << "divide by zero" << endl;
+					return -1;
+				}
+				b = pop();
+				push(b / a);
+			case '%':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '$':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '\\':
+				a = pop();
+				b = pop();
+				push(a);
+				push(b);
+				return 0;
+			case '&':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '`':
+				cout << c << " not empl" << endl;
+				return -1;
+			case '~':
+				cout << c << " not empl" << endl;
+				return -1;
 			case ':':
 				push(m_stack.top());
 				return 0;
 			}
-		push(c);
+		push(c - '0');
 		return 0;
 	}
 public:
