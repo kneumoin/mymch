@@ -10,16 +10,38 @@
 //#define DEBUG
 
 using namespace std;
+
+void resize_line(long int*& old_one, int new_size, long int z) {
+	long int* new_one = new long int[new_size + 1];
+	old_one = &old_one[-1];
+	int i, old_size = (int)old_one[0];
+	new_one[0] = new_size;
+	// TO_DO VVV
+	for (i = 1; i <= old_size; ++i){
+		new_one[i] = old_one[i];
+	}
+	for (; i < new_size; ++i){
+		new_one[i] = z;
+	}
+	delete[] old_one;
+	old_one = new_one;
+}
+
+int get_line_size(long int* line) {
+	line = &line[-1];
+	return line[0];
+}
+
 class BefungeStackMachine {
-	stack<char> m_stack;
-	int width;
-	int length;
-	int point[2];
-	vector<string> program;
+	stack<long int> m_stack;
+	unsigned int width;
+	unsigned int length;
+	unsigned int point[2];
+	vector<long int*> program;
 	char cur_dir;
 	bool running;
 	bool symb_mode;
-	char pop() {
+	long int pop() {
 #ifdef DEBUG
 		cout << point[0] << 'x' << point[1] << " pop: ";
 #endif
@@ -29,21 +51,21 @@ class BefungeStackMachine {
 #endif
 			return 0; // befunge-93 says popping off an empty stack returns 0
 		}
-		char top = m_stack.top();
+		long int top = m_stack.top();
 		m_stack.pop();
 #ifdef DEBUG
 		if (symb_mode)
 			cout << (char)top << endl;
 		else
-			cout << (int)top << endl;
+			cout << (long int)top << endl;
 #endif
 		return top;
 	}
 
-	void push(char c) {
+	void push(long int c) {
 		m_stack.push(c);
 #ifdef DEBUG
-		cout << point[0] << 'x' << point[1] << " push: " << (int)c << endl;
+		cout << point[0] << 'x' << point[1] << " push: " << (long int)c << endl;
 #endif
 	}
 
@@ -70,40 +92,38 @@ class BefungeStackMachine {
 					point[0] = length - point[0];
 				break;
 			default:
-				exit(-1);
-				//return -1;
+				return -1;
 			}
 #ifdef DEBUG
-		usleep(300000);
+		usleep(150000);
 #endif
 		return 0;
 	}
 
-	char getsymbol() {
+	long int getsymbol() {
+		int new_size;
 		if (point[0] >= program.size()){
-			int new_size;
 			if (length)
 				new_size = length;
 			else
 				new_size = point[0] * 1.5;
 			program.resize(new_size);
 		}
-		if (point[1] >= program[point[0]].size()) {
-			int new_size;
+		if (point[1] >= get_line_size(program[point[0]])) {
 			if (length)
 				new_size = length;
 			else
 				new_size = point[1] * 1.5;
-			program[point[0]].resize(new_size, ' ');
+			resize_line(program[point[0]], new_size, (long int)' ');
 		}
 #ifdef DEBUG
-		cout << "c: " << program[point[0]][point[1]] << ' ' << endl;
+		cout << "c: " << program[point[0]][point[1]] << "(" << (char)program[point[0]][point[1]] << ")" << endl;
 #endif
 		return program[point[0]][point[1]];
 	}
 
 	int exec(){
-		char a, b, res, symb, c = getsymbol();
+		long int a, b, res, symb, c = getsymbol();
 
 		if (symb_mode && c != '"') {
 			push(c);
@@ -117,13 +137,19 @@ class BefungeStackMachine {
 
 		if (c == ',') {
 			symb = pop();
-			cout << symb;
+#ifdef DEBUG
+			cout << "print: '";
+#endif
+			cout << (char)symb;
+#ifdef DEBUG
+			cout << "'" << endl;
+#endif
 			return 0;
 		}
 
 		if (c == '.') {
 			symb = pop();
-			cout << (int)symb;
+			cout << (long int)symb;
 			return 0;
 		}
 
@@ -152,8 +178,11 @@ class BefungeStackMachine {
 				push(program[pop()][pop()]);
 				return 0;
 			case '_':
-				cout << c << " not empl" << endl;
-				return -1;
+				if (pop())
+					cur_dir = '<';
+				else
+					cur_dir = '>';
+				return 0;
 			case '|':
 				if (pop())
 					cur_dir = '^';
@@ -192,13 +221,20 @@ class BefungeStackMachine {
 				cout << c << " not empl" << endl;
 				return -1;
 			case '`':
-				cout << c << " not empl" << endl;
-				return -1;
+				a = pop();
+				b = pop();
+				if (b > a)
+					push(1);
+				else
+					push(0);
+				return 0;
 			case '~':
 				cout << c << " not empl" << endl;
 				return -1;
 			case ':':
-				push(m_stack.top());
+				a = pop();
+				push(a);
+				push(a);
 				return 0;
 			}
 		push(c - '0');
@@ -206,15 +242,23 @@ class BefungeStackMachine {
 	}
 public:
 	BefungeStackMachine(ifstream& fin, int l = 0, int w = 0) : length(l), width(w) {
+		if (length or width) {
+			//TO_DO 25x80
+			throw;
+		}
 		running = false;
 		symb_mode = false;
 		srand(time(NULL));
+		long int *converted_line;
 
 		string line;
 		while(getline(fin, line)) {
-			if (!length and !width)
-				program.push_back(line);
-			//TO_DO 25x80
+			converted_line = new long int[line.length() + 1];
+			converted_line[0] = line.length();
+			converted_line = &converted_line[1];
+			for(int i = 0; i < line.length(); ++i)
+				converted_line[i] = line[i];
+			program.push_back(converted_line);
 		}
 	}
 
@@ -234,6 +278,9 @@ public:
 		do{
 			if (exec() or move())
 				running = false;
+#ifdef DEBUG
+			cout << endl;
+#endif
 		} while(running);
 	}
 };
