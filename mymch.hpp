@@ -7,14 +7,14 @@
 #include <stack>
 #include <time.h>
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 
 void resize_line(long int*& old_one, int new_size, long int z) {
 	long int* new_one = new long int[new_size + 1];
 	old_one = &old_one[-1];
-	int i, old_size = (int)old_one[0];
+	int i, old_size = static_cast<int>(old_one[0]);
 	new_one[0] = new_size;
 	// TO_DO VVV
 	for (i = 1; i <= old_size; ++i){
@@ -55,9 +55,9 @@ class BefungeStackMachine {
 		m_stack.pop();
 #ifdef DEBUG
 		if (symb_mode)
-			cout << (char)top << endl;
+			cout << static_cast<char>(top) << endl;
 		else
-			cout << (long int)top << endl;
+			cout << top << endl;
 #endif
 		return top;
 	}
@@ -65,7 +65,7 @@ class BefungeStackMachine {
 	void push(long int c) {
 		m_stack.push(c);
 #ifdef DEBUG
-		cout << point[0] << 'x' << point[1] << " push: " << (long int)c << endl;
+		cout << point[0] << 'x' << point[1] << " push: " << c << endl;
 #endif
 	}
 
@@ -114,16 +114,17 @@ class BefungeStackMachine {
 				new_size = length;
 			else
 				new_size = point[1] * 1.5;
-			resize_line(program[point[0]], new_size, (long int)' ');
+			resize_line(program[point[0]], new_size, static_cast<long int>(' '));
 		}
 #ifdef DEBUG
-		cout << "c: " << program[point[0]][point[1]] << "(" << (char)program[point[0]][point[1]] << ")" << endl;
+		cout << "c: " << program[point[0]][point[1]] << "(" << static_cast<char>(program[point[0]][point[1]]) << ")" << endl;
 #endif
 		return program[point[0]][point[1]];
 	}
 
 	int exec(){
-		long int a, b, res, symb, c = getsymbol();
+		long int a, b, c = getsymbol();
+		char x[2] = {0};
 
 		if (symb_mode && c != '"') {
 			push(c);
@@ -136,11 +137,11 @@ class BefungeStackMachine {
 		}
 
 		if (c == ',') {
-			symb = pop();
+			a = pop();
 #ifdef DEBUG
 			cout << "print: '";
 #endif
-			cout << (char)symb;
+			cout << static_cast<char>(a);
 #ifdef DEBUG
 			cout << "'" << endl;
 #endif
@@ -148,8 +149,8 @@ class BefungeStackMachine {
 		}
 
 		if (c == '.') {
-			symb = pop();
-			cout << (long int)symb;
+			a = pop();
+			cout << a;
 			return 0;
 		}
 
@@ -190,8 +191,11 @@ class BefungeStackMachine {
 					cur_dir = 'v';
 				return 0;
 			case '#':
-				cout << c << " not empl" << endl;
-				return -1;
+				move();
+				return 0;
+			case '!':
+				push(static_cast<long int>(not static_cast<bool>(pop())));
+				return 0;
 			case '-':
 				a = pop();
 				b = pop();
@@ -206,10 +210,10 @@ class BefungeStackMachine {
 				b = pop();
 				push(b / a);
 			case '%':
-				cout << c << " not empl" << endl;
+				cout << static_cast<char>(c) << " not empl" << endl;
 				return -1;
 			case '$':
-				cout << c << " not empl" << endl;
+				cout << static_cast<char>(c) << " not empl" << endl;
 				return -1;
 			case '\\':
 				a = pop();
@@ -217,20 +221,19 @@ class BefungeStackMachine {
 				push(a);
 				push(b);
 				return 0;
-			case '&':
-				cout << c << " not empl" << endl;
-				return -1;
 			case '`':
 				a = pop();
 				b = pop();
-				if (b > a)
-					push(1);
-				else
-					push(0);
+				push(static_cast<int>(b > a));
 				return 0;
 			case '~':
-				cout << c << " not empl" << endl;
-				return -1;
+				a = static_cast<long int>(cin.get());
+				push(a);
+				return 0;
+			case '&':
+				a = static_cast<long int>(cin.get()) - static_cast<long int>(' ');
+				push(a);
+				return 0;
 			case ':':
 				a = pop();
 				push(a);
