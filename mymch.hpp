@@ -7,7 +7,7 @@
 #include <stack>
 #include <time.h>
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 
@@ -150,7 +150,13 @@ class BefungeStackMachine {
 
 		if (c == '.') {
 			a = pop();
+#ifdef DEBUG
+			cout << "print: '";
+#endif
 			cout << a;
+#ifdef DEBUG
+			cout << "'" << endl;
+#endif
 			return 0;
 		}
 
@@ -210,11 +216,17 @@ class BefungeStackMachine {
 				b = pop();
 				push(b / a);
 			case '%':
-				cout << static_cast<char>(c) << " not empl" << endl;
-				return -1;
+				a = pop();
+				if (!a){
+					cout << "divide by zero" << endl;
+					return -1;
+				}
+				b = pop();
+				push(b % a);
+				return 0;
 			case '$':
-				cout << static_cast<char>(c) << " not empl" << endl;
-				return -1;
+				pop();
+				return 0;
 			case '\\':
 				a = pop();
 				b = pop();
@@ -224,14 +236,15 @@ class BefungeStackMachine {
 			case '`':
 				a = pop();
 				b = pop();
-				push(static_cast<int>(b > a));
+				push(static_cast<long int>(b > a));
 				return 0;
 			case '~':
-				a = static_cast<long int>(cin.get());
-				push(a);
+				char x;
+				cin >> x;
+				push(static_cast<long int>(x));
 				return 0;
 			case '&':
-				a = static_cast<long int>(cin.get()) - static_cast<long int>(' ');
+				cin >> a;
 				push(a);
 				return 0;
 			case ':':
