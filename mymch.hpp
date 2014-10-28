@@ -7,7 +7,9 @@
 #include <stack>
 #include <time.h>
 
-//#define DEBUG
+#define VERSION 0.1
+
+#define DEBUG
 
 using namespace std;
 
