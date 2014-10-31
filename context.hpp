@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stack>
 
+//#define DEBUG
+
 class Context {
 	std::stack<long int> m_stack;
 public:
