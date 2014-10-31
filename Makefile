@@ -15,7 +15,7 @@ functions:
 mymch:
 	$(CC) $(CFLAGS) -c mymch.cpp
 
-test:
+test: all
 	python tests/test.py
 
 clean:

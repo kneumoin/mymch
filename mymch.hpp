@@ -46,5 +46,5 @@ public:
 	BefungeStackMachine(ifstream&, long int, long int);
 
 	void print_program(void);
-	void run(const int*);
+	void run(PP&&);
 };

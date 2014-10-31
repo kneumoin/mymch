@@ -3,12 +3,14 @@
 
 //#define DEBUG
 
+typedef unsigned int PP[2];
+
 class Context {
 	std::stack<long int> m_stack;
 public:
 	unsigned int width;
 	unsigned int length;
-	unsigned int point[2];
+	PP point;
 	long int cur_dir;
 	bool symb_mode;
 	bool running;

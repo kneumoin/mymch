@@ -144,10 +144,11 @@ void BefungeStackMachine::print_program() {
 		cout << line << endl;
 }
 
-void BefungeStackMachine::run(const int* start_point){
+void BefungeStackMachine::run(PP&& start_point){
 	cont.running = true;
 	// VV TO_DO
-	memcpy(cont.point, start_point, sizeof(start_point));
+	//memcpy(cont.point, start_point, sizeof(start_point));
+	std::swap(cont.point, start_point);
 	cont.cur_dir = '>';
 	do{
 		if (exec() or move())
@@ -163,11 +164,11 @@ int main(int args, char* argv[]){
 		cout << "invalid param" << endl;
 		exit(0);
 	}
-	ifstream fin( argv[1] );
-	BefungeStackMachine* A = new BefungeStackMachine(fin);
-	int a[] = {0,0};
-	A->run(a);
+	ifstream in( argv[1] );
+	BefungeStackMachine* A = new BefungeStackMachine(in);
+	PP a = {0,0};
+	A->run(std::move(a));
 	delete(A);
-	fin.close();
+	in.close();
 	return 0;
 }
