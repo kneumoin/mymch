@@ -5,7 +5,7 @@
 #include <map>
 #include <unistd.h>
 
-#define VERSION 0.1
+#define VERSION 0.11
 
 //#define DEBUG
 
