@@ -156,25 +156,13 @@ int _dup(Context* cont) {
 
 int _print_char(Context* cont) {
 	auto a = cont->pop();
-#ifdef DEBUG
-	std::cout << "print: '";
-#endif
 	// TO_DO
 	std::cout << static_cast<char>(a);
-#ifdef DEBUG
-	std::cout << "'" << std::endl;
-#endif
 	return 0;
 }
 
 int _print_int(Context* cont) {
 	auto a = cont->pop();
-#ifdef DEBUG
-	std::cout << "print: '";
-#endif
 	std::cout << a;
-#ifdef DEBUG
-	std::cout << "'" << std::endl;
-#endif
 	return 0;
 }

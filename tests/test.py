@@ -24,7 +24,10 @@ for test in tests:
 	if ok:
 		print "%s:\tPASS" % test
 	else:
-		print "%s:\tFAILED got:%r expect:%r" % (test, out, tests[test])
+		if tests[test]:
+			print "%s:\tFAILED got:%r expect:%r" % (test, out, tests[test])
+		else:
+			print "FAILED"
 		failed = True
 
 if failed:

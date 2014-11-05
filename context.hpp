@@ -1,13 +1,12 @@
 #include <iostream>
 #include <stack>
 
-//#define DEBUG
-
 typedef unsigned int PP[2];
 
 class Context {
 	std::stack<long int> m_stack;
 public:
+	Context();
 	unsigned int width;
 	unsigned int length;
 	PP point;

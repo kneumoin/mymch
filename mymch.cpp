@@ -4,9 +4,6 @@
 #include "mymch.hpp"
 
 int BefungeStackMachine::move(void){
-#ifdef DEBUG
-	usleep(150000);
-#endif
 	try {
 		return ft[cont.cur_dir](&cont);
 	}
@@ -24,23 +21,13 @@ long int BefungeStackMachine::getsymbol(void) {
 			new_size = cont.point[0] * 1.5;
 		program.resize(new_size);
 	}
-#ifdef DEBUG
-		cout << "cont.point[1]: " << cont.point[1] << " length:" << get_line_size(program[cont.point[0]])<< endl;
-#endif
 	if (cont.point[1] >= get_line_size(program[cont.point[0]])) {
 		if (cont.length)
 			new_size = cont.length;
 		else
 			new_size = cont.point[1] * 1.5;
 		resize_line(program[cont.point[0]], new_size, static_cast<long int>(' '));
-#ifdef DEBUG
-		cout << "realloc: " << new_size << endl;
-#endif
 	}
-#ifdef DEBUG
-	cout << "c: " << program[cont.point[0]][cont.point[1]];
-	cout << "(" << static_cast<char>(program[cont.point[0]][cont.point[1]]) << ")" << endl;
-#endif
 	return program[cont.point[0]][cont.point[1]];
 }
 
@@ -90,13 +77,9 @@ int BefungeStackMachine::exec(void){
 BefungeStackMachine::~BefungeStackMachine() {};
 
 BefungeStackMachine::BefungeStackMachine(ifstream& in, long int l = 0, long int w = 0) {
-	cont.length = l;
-	cont.width = w;
-	if (cont.length or cont.width) {
+	if (l or w) {
 		throw "TO_DO 25x80";
 	}
-	cont.running = false;
-	cont.symb_mode = false;
 
 	ft.insert(make_pair('>', &_move_r));
 	ft.insert(make_pair('<', &_move_l));
@@ -146,16 +129,10 @@ void BefungeStackMachine::print_program() {
 
 void BefungeStackMachine::run(PP&& start_point){
 	cont.running = true;
-	// VV TO_DO
-	//memcpy(cont.point, start_point, sizeof(start_point));
 	std::swap(cont.point, start_point);
-	cont.cur_dir = '>';
 	do{
 		if (exec() or move())
 			cont.running = false;
-#ifdef DEBUG
-		cout << endl;
-#endif
 	} while(cont.running);
 }
 

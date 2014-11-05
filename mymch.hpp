@@ -7,8 +7,6 @@
 
 #define VERSION 0.11
 
-//#define DEBUG
-
 using namespace std;
 
 // TO_DO----------------------------------------------------
